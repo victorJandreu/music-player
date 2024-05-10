@@ -2,92 +2,86 @@ import React, { useRef, useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function Player({
-  musicData,
-  setMusicData,
-  actualSong,
-  setActualSong,
+  setCurrentSong,
+  song,
+  currentSong,
+  isPlaying,
+  setIsPlaying,
+  setSong,
+  audioRef,
+  currentTime,
+  handleTime,
+  setCurrentTime,
 }) {
-  const [playing, setPlaying] = useState(false);
-  const [audioData, setAudioData] = useState({
-    currentTime: 0,
-    duration: 0,
-  });
-
-  const audioRef = useRef(null);
-
-  const playYa = () => {
-    !playing ? audioRef.current.play() : audioRef.current.pause();
-    setPlaying((prev) => !prev);
+  const playSongHandle = () => {
+    if (!isPlaying) {
+      audioRef.current.play();
+      setIsPlaying(true);
+    } else {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
   };
 
-  const audioInfo = () => {
-    setAudioData({
-      currentTime: audioRef.current.currentTime,
-      duration: audioRef.current.duration,
-    });
-  };
-
-  const incrementar = () => {
-    setMusicData((prev) => {
-      let array = [];
+  //pasar a la siguiente cancion
+  const incrementar = async () => {
+    await setSong((prev) => {
       const todoFalse = prev.map((x) => {
         return {
           ...x,
           active: false,
         };
       });
-      for (let i = 0; i < prev.length; i++) {
-        if (prev[i].id === actualSong[0].id) {
-          array = todoFalse.map((x, index) => {
-            if (index === 0 && i + 1 === prev.length) {
-              return {
-                ...x,
-                active: true,
-              };
-            } else if (index === i + 1) {
-              return {
-                ...x,
-                active: true,
-              };
-            } else {
-              return x;
-            }
-          });
+
+      const currentIndex = todoFalse.findIndex((x) => x.id === currentSong.id);
+      return todoFalse.map((cancion, index) => {
+        if ((currentIndex + 1) % todoFalse.length === 0 && index === 0) {
+          return {
+            ...cancion,
+            active: true,
+          };
+        } else if (currentIndex + 1 === index) {
+          return {
+            ...cancion,
+            active: true,
+          };
+        } else {
+          return { ...cancion };
         }
-      }
-      return array;
+      });
     });
   };
 
+  //pasar a la cancion anterior
   const decrementar = () => {
-    setMusicData((prev) => {
-      let array = [];
+    setSong((prev) => {
       const todoFalse = prev.map((x) => {
         return {
           ...x,
           active: false,
         };
       });
-      for (let i = 0; i < prev.length; i++) {
-        if (prev[i].id === actualSong[0].id) {
-          array = todoFalse.map((x, index) => {
-            if (i === 0 && index === prev.length - 1) {
-              return {
-                ...x,
-                active: true,
-              };
-            } else if (index === i - 1) {
-              return {
-                ...x,
-                active: true,
-              };
-            } else {
-              return x;
-            }
-          });
+
+      const currentIndex = todoFalse.findIndex((x) => x.id === currentSong.id);
+
+      return todoFalse.map((cancion, index) => {
+        if (
+          (currentIndex - 1) % todoFalse.length === -1 &&
+          index === todoFalse.length - 1
+        ) {
+          return {
+            ...cancion,
+            active: true,
+          };
+        } else if (currentIndex - 1 === index) {
+          return {
+            ...cancion,
+            active: true,
+          };
+        } else {
+          return cancion;
         }
-      }
-      return array;
+      });
     });
   };
 
@@ -97,17 +91,46 @@ export default function Player({
     );
   };
 
-  const cambioValue = (e) => {
+  // modificar el momento de la cancion al mover el input radio
+  const dragHandler = (e) => {
+    setCurrentTime((prev) => {
+      audioRef.current.currentTime = e.target.value;
+      return {
+        ...prev,
+        currentTime: e.target.value,
+      };
+    });
+  };
 
-    audioRef.current.currentTime = e.target.value
-  }
+
+/* style */
+
+const trackAnime = {
+  transform: `translateX(${currentTime.animationPercentaje}%)`,
+}
+
+const endHandle = async () => {
+  incrementar()
+  };
+
+ 
+
 
   return (
     <div className="player">
       <div className="time-control">
-        <p>{getTime(audioData.currentTime)}</p>
-        <input type="range" min={0} max={audioData.duration} onChange={(e) => cambioValue(e)}  />
-        <p>{getTime(audioData.duration)}</p>
+        <p>{getTime(currentTime.currentTime)}</p>
+        <div style={{background: `linear-gradient(to right, ${currentSong.color[0]}, ${currentSong.color[1]})`}} className="track">
+          <input
+            type="range"
+            min={0}
+            max={currentTime.duration ? currentTime.duration : 0}
+            value={currentTime.currentTime ? currentTime.currentTime : 0}
+            onChange={dragHandler}
+          />
+          <div style={trackAnime} className="animate-track"></div>
+        </div>
+        <p>{currentTime.duration ? getTime(currentTime.duration) : "0:00"}</p>
       </div>
       <div className="play-control">
         <FontAwesomeIcon
@@ -118,10 +141,10 @@ export default function Player({
         />
 
         <FontAwesomeIcon
-          icon={!playing ? "fa-play" : "fa-circle-pause"}
+          icon={!isPlaying ? "fa-play" : "fa-circle-pause"}
           size="3x"
           className="play"
-          onClick={playYa}
+          onClick={playSongHandle}
         />
 
         <FontAwesomeIcon
@@ -132,10 +155,11 @@ export default function Player({
         />
       </div>
       <audio
-        src={actualSong[0].audio}
         ref={audioRef}
-        onTimeUpdate={audioInfo}
-        onLoadedData={audioInfo}
+        src={currentSong.audio}
+        onTimeUpdate={(e) => handleTime(e)}
+        onLoadedMetadata={handleTime}
+        onEnded={endHandle}
       />
     </div>
   );

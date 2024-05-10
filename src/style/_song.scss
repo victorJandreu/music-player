@@ -8,7 +8,23 @@
     img{
         width: 20%;
         border-radius: 50%;
+       
     }
+
+    .rotateAnimation{
+        animation: bounceIn 40s linear infinite; 
+    }
+
+    @keyframes bounceIn {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+      }
+
+  
 
     h2{
         padding: 3rem 1rem 1rem 1rem;
@@ -17,5 +33,14 @@
     h3{
         font-size: 1rem;
     }
+}
+
+@media screen and (max-width: 768px) {
+    .song-container{
+        img{
+            width: 60%;
+        }
+    }
+    
 }
 

@@ -9,9 +9,14 @@
 .time-control{
     width: 50%;
     display: flex;
-    input{
+    align-items: center;
+    input[type="range"]{
+        -webkit-appearance: none;
+        appearance: none;
         width: 100%;
         padding: 1rem 0rem;
+        background-color: transparent;
+        cursor: pointer;
     }
     p{
         padding: 1rem;
@@ -30,3 +35,49 @@
     }
 }
 
+input[type="range"]:focus{
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 100%;
+}
+
+input[type="range"]::-moz-range-thumb {
+  
+    background: transparent;
+    border: none;
+}
+
+.track{
+    width: 100%;
+    height: 1rem;
+    background-color: rgb(25, 81, 81);
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.animate-track{
+    background-color: gainsboro;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+@media screen and (max-width: 768px) {
+    .time-control{
+        width: 90%;
+    }
+
+    .play-control{
+        width: 60%;
+    }
+    
+}
