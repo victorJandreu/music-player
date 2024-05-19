@@ -16,7 +16,14 @@ nav{
             color: white;
         }
        }
+
+       .icon{
+        padding: 0 0 0 .5rem  ;
+       }
+      
    }
+
+ 
 
 
    
@@ -24,7 +31,10 @@ nav{
     nav{
         button{
             z-index: 10;
+
+            
         }
+      
     }
     
 }

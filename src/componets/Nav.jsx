@@ -17,6 +17,7 @@ export default function Nav({setIsLibraryOpen}) {
         Library
         <FontAwesomeIcon
           icon="fa-music"
+          className="icon"
         />
       </button>
     </nav>
